@@ -1,0 +1,121 @@
+from fastapi import FastAPI, HTTPException
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_core.messages import HumanMessage, SystemMessage
+from pydantic import BaseModel
+import re
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="Chess AI Agent")
+
+gpt = ChatOpenAI(model="gpt-4o-mini", temperature=0.1, max_tokens=150)
+claude = ChatAnthropic(model="claude-opus-4-6", temperature=0.1, max_tokens=150)
+
+class BoardRequest(BaseModel):
+    board: str
+    color: str
+    model: str
+    history: list = []
+    invalid_moves: list = []
+    valid_moves: list = []
+
+SYSTEM_PROMPT = """Você é um Grande Mestre de xadrez competitivo. Seu único objetivo é VENCER a partida.
+
+Representação do tabuleiro:
+- K=Rei branco, Q=Rainha branca, R=Torre branca, B=Bispo branco, N=Cavalo branco, P=Peão branco
+- k=Rei preto,  q=Rainha preta,  r=Torre preta,  b=Bispo preto,  n=Cavalo preto,  p=Peão preto
+- . = casa vazia
+
+Layout: topo=linha 8, base=linha 1, esquerda=coluna a, direita=coluna h.
+
+PRINCÍPIOS ESTRATÉGICOS (prioridade decrescente):
+1. Se há xeque-mate disponível, faça-o imediatamente
+2. Se há captura de peça valiosa sem perda equivalente, faça-a (Q=9, R=5, B=3, N=3, P=1)
+3. Se o adversário ameaça sua peça valiosa, defenda ou mova-a
+4. Controle o centro (casas e4, e5, d4, d5)
+5. Desenvolva peças menores (bispos e cavalos) antes de mover a rainha
+6. Mantenha o rei seguro (roque cedo quando possível)
+7. Conecte as torres e crie ameaças coordenadas
+
+REGRA ABSOLUTA: Você receberá uma lista de movimentos válidos.
+Escolha EXATAMENTE um da lista. NUNCA invente um movimento fora dela.
+
+Responda NESTE FORMATO EXATO:
+RACIOCINIO: [analise brevemente as 2-3 melhores opções e justifique sua escolha]
+MOVIMENTO: origem destino"""
+
+def build_prompt(board: str, color: str, history: list = [], valid_moves: list = []) -> str:
+    recent_history = history[-10:] if len(history) > 10 else history
+    history_text = "\n".join(recent_history) if recent_history else "Nenhum movimento ainda"
+    moves_text = ", ".join(valid_moves) if valid_moves else "Nenhum"
+
+    return f"""Você joga com as {color}.
+
+Histórico recente:
+{history_text}
+
+Tabuleiro atual:
+{board}
+
+MOVIMENTOS VÁLIDOS: {moves_text}
+
+Analise a posição e escolha o melhor movimento estratégico."""
+
+def extract_move(response: str) -> str:
+    movimento_match = re.search(r'MOVIMENTO:\s*([a-h][1-8])\s+([a-h][1-8])', response, re.IGNORECASE)
+    if movimento_match:
+        move = f"{movimento_match.group(1).lower()} {movimento_match.group(2).lower()}"
+        logger.info(f"Movimento extraído do formato MOVIMENTO:")
+        return move
+
+    response_lower = response.strip().lower()
+    pattern = r'\b([a-h][1-8])\s+([a-h][1-8])\b'
+    match = re.search(pattern, response_lower)
+    if match:
+        return f"{match.group(1)} {match.group(2)}"
+
+    raise ValueError(f"Não foi possível extrair movimento válido de: {response}")
+
+@app.post("/move")
+async def get_move(req: BoardRequest):
+    try:
+        logger.info(f"Modelo: {req.model} | Cor: {req.color}")
+        logger.info(f"Movimentos válidos ({len(req.valid_moves)}): {req.valid_moves}")
+        logger.info(f"Histórico ({len(req.history)} movimentos): {req.history[-10:]}")
+
+        messages = [
+            SystemMessage(content=SYSTEM_PROMPT),
+            HumanMessage(content=build_prompt(req.board, req.color, req.history, req.valid_moves))
+        ]
+
+        if req.model == "GPT":
+            response = await gpt.ainvoke(messages)
+        elif req.model == "CLAUDE":
+            response = await claude.ainvoke(messages)
+        else:
+            raise HTTPException(status_code=400, detail=f"Modelo inválido: {req.model}")
+
+        raw_move = response.content
+        logger.info(f"Resposta bruta do {req.model}:\n{raw_move}")
+
+        move = extract_move(raw_move)
+
+        if req.valid_moves and move not in req.valid_moves:
+            raise ValueError(f"Movimento '{move}' não está na lista de válidos.")
+
+        logger.info(f"Movimento final: {move}")
+        return {"move": move}
+
+    except ValueError as e:
+        logger.error(f"Erro: {e}")
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        logger.error(f"Erro inesperado: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "models": ["GPT", "CLAUDE"]}

@@ -1,0 +1,74 @@
+package br.com.chessapp.chess.pieces;
+
+import br.com.chessapp.boardgame.Board;
+import br.com.chessapp.boardgame.Position;
+import br.com.chessapp.chess.ChessPiece;
+import br.com.chessapp.chess.Color;
+
+public class Knight extends ChessPiece {
+
+    public Knight(Board board, Color color) {
+        super(board, color);
+    }
+
+    @Override
+    public String toString() {
+        return getColor() == Color.WHITE ? "♘" : "♞";
+    }
+
+    private boolean canMove(Position position) {
+        ChessPiece p = (ChessPiece) getBoard().piece(position);
+        return p == null || p.getColor() != getColor();
+    }
+
+    @Override
+    public boolean[][] possibleMoves() {
+        boolean[][] mat = new boolean[getBoard().getRows()][getBoard().getColumns()];
+
+        Position p = new Position(0, 8);
+
+
+        p.setValues(position.getRow() - 1, position.getComlumn() - 2);
+        if (getBoard().positionExists(p) && canMove(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() - 2, position.getComlumn() - 1);
+        if (getBoard().positionExists(p) && canMove(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() - 2, position.getComlumn() + 1);
+        if (getBoard().positionExists(p) && canMove(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() - 1, position.getComlumn() + 2);
+        if (getBoard().positionExists(p) && canMove(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() + 1, position.getComlumn() + 2);
+        if (getBoard().positionExists(p) && canMove(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() + 2, position.getComlumn() + 1);
+        if (getBoard().positionExists(p) && canMove(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() + 2, position.getComlumn() - 1);
+        if (getBoard().positionExists(p) && canMove(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() + 1, position.getComlumn() - 2);
+        if (getBoard().positionExists(p) && canMove(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        return mat;
+    }
+
+}

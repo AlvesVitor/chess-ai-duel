@@ -1,0 +1,67 @@
+package br.com.chessapp.chess.pieces;
+
+import br.com.chessapp.boardgame.Board;
+import br.com.chessapp.boardgame.Position;
+import br.com.chessapp.chess.ChessPiece;
+import br.com.chessapp.chess.Color;
+
+public class Bishop extends ChessPiece {
+
+    public Bishop(Board board, Color color) {
+        super(board, color);
+    }
+
+    @Override
+    public String toString() {
+        return getColor() == Color.WHITE ? "♗" : "♝";
+    }
+
+    @Override
+    public boolean[][] possibleMoves() {
+        boolean[][] mat = new boolean[getBoard().getRows()][getBoard().getColumns()];
+
+        Position p = new Position(0, 0);
+
+        p.setValues(position.getRow() - 1, position.getComlumn() - 1);
+        while (getBoard().positionExists(p) && !getBoard().thereIsAPiece(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+            p.setValues(p.getRow() - 1, p.getComlumn() - 1);
+        }
+
+        if (getBoard().positionExists(p) && isThereOpponentPiece(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() - 1, position.getComlumn() + 1);
+        while (getBoard().positionExists(p) && !getBoard().thereIsAPiece(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+            p.setValues(p.getRow() - 1, p.getComlumn() + 1);
+        }
+
+        if (getBoard().positionExists(p) && isThereOpponentPiece(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() + 1, position.getComlumn() + 1);
+        while (getBoard().positionExists(p) && !getBoard().thereIsAPiece(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+            p.setValues(p.getRow() + 1, p.getComlumn() + 1);
+        }
+
+        if (getBoard().positionExists(p) && isThereOpponentPiece(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        p.setValues(position.getRow() + 1, position.getComlumn() - 1);
+        while (getBoard().positionExists(p) && !getBoard().thereIsAPiece(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+            p.setValues(p.getRow() + 1, p.getComlumn() - 1);
+        }
+        if (getBoard().positionExists(p) && isThereOpponentPiece(p)) {
+            mat[p.getRow()][p.getComlumn()] = true;
+        }
+
+        return mat;
+    }
+
+}
