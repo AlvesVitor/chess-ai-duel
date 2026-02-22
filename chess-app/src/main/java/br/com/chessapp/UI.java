@@ -58,7 +58,7 @@ public class UI {
 
         } else {
             System.out.println("\n╔══════════════════════════════╗");
-            System.out.println("║        ♟ CHEQUE-MATE! ♟       ║");
+            System.out.println("║       ♟ CHEQUE-MATE! ♟       ║");
             System.out.println("╚══════════════════════════════╝");
             if (chessMatch.getCurrentPlayer() == Color.BLACK) {
                 System.out.println("🏆 Vencedor: ♙ GPT (Brancas)!");

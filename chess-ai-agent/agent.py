@@ -43,9 +43,13 @@ PRINCÍPIOS ESTRATÉGICOS (prioridade decrescente):
 REGRA ABSOLUTA: Você receberá uma lista de movimentos válidos.
 Escolha EXATAMENTE um da lista. NUNCA invente um movimento fora dela.
 
-Responda NESTE FORMATO EXATO:
-RACIOCINIO: [analise brevemente as 2-3 melhores opções e justifique sua escolha]
-MOVIMENTO: origem destino"""
+Responda EXATAMENTE assim (duas linhas, nada mais):
+RACIOCINIO: 3-5 palavras
+MOVIMENTO: origem destino
+
+Exemplo:
+RACIOCINIO: captura peão central
+MOVIMENTO: c5 d4"""
 
 def build_prompt(board: str, color: str, history: list = [], valid_moves: list = []) -> str:
     recent_history = history[-10:] if len(history) > 10 else history
