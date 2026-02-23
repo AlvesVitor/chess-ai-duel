@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Chess AI Agent")
 
-gpt = ChatOpenAI(model="gpt-4o-mini", temperature=0.1, max_tokens=150)
-claude = ChatAnthropic(model="claude-opus-4-6", temperature=0.1, max_tokens=150)
+gpt = ChatOpenAI(model="gpt-4o-mini", temperature=0.1, max_tokens=300)
+claude = ChatAnthropic(model="claude-haiku-4-5", temperature=0.1, max_tokens=300)
 
 class BoardRequest(BaseModel):
     board: str
