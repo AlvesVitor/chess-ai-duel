@@ -19,8 +19,8 @@ class BoardRequest(BaseModel):
     color: str
     model: str
     history: list = []
-    invalid_moves: list = []
     valid_moves: list = []
+    in_check: bool = False
 
 SYSTEM_PROMPT = """Você é um Grande Mestre de xadrez competitivo. Seu único objetivo é VENCER a partida.
 
@@ -32,6 +32,7 @@ Representação do tabuleiro:
 Layout: topo=linha 8, base=linha 1, esquerda=coluna a, direita=coluna h.
 
 PRINCÍPIOS ESTRATÉGICOS (prioridade decrescente):
+0. Se você está em xeque, OBRIGATORIAMENTE escolha um movimento válido e que tire o rei do xeque
 1. Se há xeque-mate disponível, faça-o imediatamente
 2. Se há captura de peça valiosa sem perda equivalente, faça-a (Q=9, R=5, B=3, N=3, P=1)
 3. Se o adversário ameaça sua peça valiosa, defenda ou mova-a
@@ -39,6 +40,7 @@ PRINCÍPIOS ESTRATÉGICOS (prioridade decrescente):
 5. Desenvolva peças menores (bispos e cavalos) antes de mover a rainha
 6. Mantenha o rei seguro (roque cedo quando possível)
 7. Conecte as torres e crie ameaças coordenadas
+8. Previna possíveis cheques e ataques diretos ao rei (antecipe ameaças antes que ocorram)
 
 REGRA ABSOLUTA: Você receberá uma lista de movimentos válidos.
 Escolha EXATAMENTE um da lista. NUNCA invente um movimento fora dela.
@@ -51,22 +53,23 @@ Exemplo:
 RACIOCINIO: captura peão central
 MOVIMENTO: c5 d4"""
 
-def build_prompt(board: str, color: str, history: list = [], valid_moves: list = []) -> str:
+def build_prompt(board: str, color: str, history: list = [], valid_moves: list = [], in_check: bool = False) -> str:
     recent_history = history[-10:] if len(history) > 10 else history
     history_text = "\n".join(recent_history) if recent_history else "Nenhum movimento ainda"
     moves_text = ", ".join(valid_moves) if valid_moves else "Nenhum"
+    check_alert = "\n⚠️ SEU REI ESTÁ EM XEQUE! Escolha OBRIGATORIAMENTE um movimento que tire o rei do xeque.\n" if in_check else ""
 
-    return f"""Você joga com as {color}.
-
-Histórico recente:
-{history_text}
-
-Tabuleiro atual:
+    return f"""Cor: {color}
+{check_alert}
+Tabuleiro ATUAL — leia antes de jogar (peças mudaram desde o início):
 {board}
+
+Histórico: {history_text}
 
 MOVIMENTOS VÁLIDOS: {moves_text}
 
-Analise a posição e escolha o melhor movimento estratégico."""
+REGRA FINAL: Escolha APENAS um movimento da lista acima.
+A lista já considera o estado atual do tabuleiro. Não invente movimentos."""
 
 def extract_move(response: str) -> str:
     movimento_match = re.search(r'MOVIMENTO:\s*([a-h][1-8])\s+([a-h][1-8])', response, re.IGNORECASE)
@@ -87,12 +90,12 @@ def extract_move(response: str) -> str:
 async def get_move(req: BoardRequest):
     try:
         logger.info(f"Modelo: {req.model} | Cor: {req.color}")
-        logger.info(f"Movimentos válidos ({len(req.valid_moves)}): {req.valid_moves}")
-        logger.info(f"Histórico ({len(req.history)} movimentos): {req.history[-10:]}")
+        # logger.info(f"Movimentos válidos ({len(req.valid_moves)}): {req.valid_moves}")
+        # logger.info(f"Histórico ({len(req.history)} movimentos): {req.history[-10:]}")
 
         messages = [
             SystemMessage(content=SYSTEM_PROMPT),
-            HumanMessage(content=build_prompt(req.board, req.color, req.history, req.valid_moves))
+            HumanMessage(content=build_prompt(req.board, req.color, req.history, req.valid_moves, req.in_check))
         ]
 
         if req.model == "GPT":

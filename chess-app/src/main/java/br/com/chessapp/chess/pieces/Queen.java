@@ -11,9 +11,14 @@ public class Queen extends ChessPiece {
         super(board, color);
     }
 
+//    @Override
+//    public String toString() {
+//        return getColor() == Color.WHITE ? "♕" : "♛";
+//    }
+
     @Override
     public String toString() {
-        return getColor() == Color.WHITE ? "♕" : "♛";
+        return "♛";
     }
 
     @Override
@@ -93,7 +98,7 @@ public class Queen extends ChessPiece {
             mat[p.getRow()][p.getComlumn()] = true;
             p.setValues(p.getRow() + 1, p.getComlumn() - 1);
         }
-        
+
         if (getBoard().positionExists(p) && isThereOpponentPiece(p)) {
             mat[p.getRow()][p.getComlumn()] = true;
         }

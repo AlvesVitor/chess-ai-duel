@@ -11,9 +11,14 @@ public class Knight extends ChessPiece {
         super(board, color);
     }
 
+//    @Override
+//    public String toString() {
+//        return getColor() == Color.WHITE ? "♘" : "♞";
+//    }
+
     @Override
     public String toString() {
-        return getColor() == Color.WHITE ? "♘" : "♞";
+        return "♞";
     }
 
     private boolean canMove(Position position) {

@@ -16,9 +16,10 @@ public class ChessAIClient {
     private final ObjectMapper mapper = new ObjectMapper();
 
     public String[] getMove(String board, String color, String model,
-                            List<String> history, List<String> validMoves) throws Exception {
+                            List<String> history, List<String> validMoves, boolean inCheck) throws Exception {
 
-        ChessMoveRequestDTO req = new ChessMoveRequestDTO(board, color, model, history, validMoves);
+        ChessMoveRequestDTO req = new ChessMoveRequestDTO(board, color, model, history, validMoves, inCheck);
+
         String json = mapper.writeValueAsString(req);
 
         HttpRequest request = HttpRequest.newBuilder()

@@ -53,14 +53,14 @@ public class UI {
             }
 
             if (chessMatch.getCheck()) {
-                System.out.println("⚠️  CHECK! O rei está em perigo!");
+                System.out.println("⚠️  XEQUE! O rei está em perigo!");
             }
 
         } else {
             System.out.println("\n╔══════════════════════════════╗");
-            System.out.println("║       ♟ CHEQUE-MATE! ♟       ║");
+            System.out.println("║       ♟ XEQUE-MATE! ♟       ║");
             System.out.println("╚══════════════════════════════╝");
-            if (chessMatch.getCurrentPlayer() == Color.BLACK) {
+            if (chessMatch.getCurrentPlayer() == Color.WHITE) {
                 System.out.println("🏆 Vencedor: ♙ GPT (Brancas)!");
             } else {
                 System.out.println("🏆 Vencedor: ♟ CLAUDE (Pretas)!");
@@ -168,11 +168,11 @@ public class UI {
 
         System.out.println("⚔️  Baixas da batalha:");
         System.out.print(ANSI_WHITE + "  ♙ GPT capturou    : [ ");
-        for (ChessPiece p : black) System.out.print(p + " ");
+        for (ChessPiece p : black) System.out.print(ANSI_BLACK + p + ANSI_WHITE + " ");
         System.out.println("]" + ANSI_RESET);
 
         System.out.print(ANSI_BLACK + "  ♟ CLAUDE capturou : [ ");
-        for (ChessPiece p : white) System.out.print(p + " ");
+        for (ChessPiece p : white) System.out.print(ANSI_WHITE + p + ANSI_BLACK + " ");
         System.out.println("]" + ANSI_RESET);
         System.out.println();
     }

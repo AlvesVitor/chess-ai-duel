@@ -57,8 +57,23 @@ public class ChessMatch {
     public boolean[][] possibleMoves(ChessPosition sourcePosition) {
         Position position = sourcePosition.toPosition();
         validateSourcePosition(position);
-        return board.piece(position).possibleMoves();
 
+        boolean[][] mat = board.piece(position).possibleMoves();
+
+        for (int i = 0; i < board.getRows(); i++) {
+            for (int j = 0; j < board.getColumns(); j++) {
+                if (mat[i][j]) {
+                    Piece captured = makeMove(position, new Position(i, j));
+                    boolean inCheck = testCheck(currentPlayer);
+                    undoMove(position, new Position(i, j), captured);
+                    if (inCheck) {
+                        mat[i][j] = false;
+                    }
+                }
+            }
+        }
+
+        return mat;
     }
 
     public ChessPiece performChessMove(ChessPosition sourcePosition, ChessPosition targetPosition) {
@@ -71,12 +86,12 @@ public class ChessMatch {
 
         if (testCheck(currentPlayer)) {
             undoMove(source, target, capturedPiece);
-            throw new ChessException("Você não pode se colocar em check!");
+            throw new ChessException("Você não pode se colocar em xeque!");
         }
 
         check = testCheck(opponent(currentPlayer));
 
-        if (testCheck(opponent(currentPlayer))) {
+        if (testCheckMate(opponent(currentPlayer))) {
             checkMate = true;
         } else {
             nextTurn();

@@ -24,9 +24,9 @@ public class Main {
             String color = chessMatch.getCurrentPlayer() == Color.WHITE ? "brancas" : "pretas";
             String icon = chessMatch.getCurrentPlayer() == Color.WHITE ? "♙" : "♟";
 
-            System.out.println("\n┌───────────────────────────────────────────");
-            System.out.println("│  🧠 " + icon + " " + currentModel + " (" + color + ") está calculando...  ");
-            System.out.println("└───────────────────────────────────────────");
+            System.out.println("\n───────────────────────────────────────────");
+            System.out.println("   🧠 " + icon + " " + currentModel + " (" + color + ") está calculando...  ");
+            System.out.println("───────────────────────────────────────────");
 
             boolean moveMade = false;
             int attempts = 0;
@@ -36,7 +36,8 @@ public class Main {
 
                     String board = boardToString(chessMatch.getPieces());
                     List<String> validMoves = getValidMoves(chessMatch);
-                    String[] move = aiClient.getMove(board, color, currentModel, moveHistory, validMoves);
+                    boolean inCheck = chessMatch.getCheck();
+                    String[] move = aiClient.getMove(board, color, currentModel, moveHistory, validMoves, inCheck);
 
                     ChessPosition source = parsePosition(move[0]);
                     ChessPosition target = parsePosition(move[1]);
@@ -61,7 +62,7 @@ public class Main {
 
                 } catch (ChessException e) {
                     attempts++;
-                    System.out.println("⚠️  Jogada inválida de " + icon + " " + currentModel + " — tentativa " + attempts + "/5");
+                    System.out.println("⚠️  Jogada inválida de " + icon + " " + currentModel + " — tentativa " + attempts + "/5: " + e.getMessage());
                     Thread.sleep(500);
                 } catch (Exception e) {
                     attempts++;
@@ -80,12 +81,11 @@ public class Main {
         UI.printMatch(chessMatch, captured);
 
         if (chessMatch.getCheckMate()) {
-            String winner = chessMatch.getCurrentPlayer() == Color.WHITE
-                    ? "♟ CLAUDE (Pretas)"
-                    : "♙ GPT (Brancas)";
-            System.out.println("\n╔═══════════════════════════════════════════");
-            System.out.println("║  🏆 VENCEDOR DA BATALHA: " + winner);
-            System.out.println("╚═══════════════════════════════════════════");
+            String winner = chessMatch.getCurrentPlayer() == Color.WHITE ? "GPT (brancas)" : "CLAUDE (pretas)";
+
+            System.out.println("\n═══════════════════════════════════════════");
+            System.out.println("   🏆 VENCEDOR DA BATALHA: " + winner);
+            System.out.println("═══════════════════════════════════════════");
         }
     }
 

@@ -11,9 +11,14 @@ public class Pawn extends ChessPiece {
         super(board, color);
     }
 
+//    @Override
+//    public String toString() {
+//        return getColor() == Color.WHITE ? "♙" : "♟";
+//    }
+
     @Override
     public String toString() {
-        return getColor() == Color.WHITE ? "♙" : "♟";
+        return "♟";
     }
 
     @Override

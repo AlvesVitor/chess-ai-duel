@@ -12,13 +12,16 @@ public class ChessMoveRequestDTO {
 
     @JsonProperty("valid_moves")
     public List<String> validMoves;
+    @JsonProperty("in_check")
+    public boolean inCheck;
 
     public ChessMoveRequestDTO(String board, String color, String model,
-                               List<String> history, List<String> validMoves) {
+                               List<String> history, List<String> validMoves, boolean inCheck) {
         this.board = board;
         this.color = color;
         this.model = model;
         this.history = history;
         this.validMoves = validMoves;
+        this.inCheck = inCheck;
     }
 }
