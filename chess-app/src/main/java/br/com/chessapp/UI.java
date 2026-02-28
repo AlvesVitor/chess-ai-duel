@@ -43,7 +43,6 @@ public class UI {
         printBoard(chessMatch.getPieces());
         System.out.println(" ");
         printCapturedPieces(captured);
-        System.out.println("⚡ Turno : " + chessMatch.getTurn());
 
         if (!chessMatch.getCheckMate()) {
             if (chessMatch.getCurrentPlayer() == Color.BLACK) {
@@ -58,7 +57,7 @@ public class UI {
 
         } else {
             System.out.println("\n╔══════════════════════════════╗");
-            System.out.println("║       ♟ XEQUE-MATE! ♟       ║");
+            System.out.println("║       ♟ XEQUE-MATE! ♟        ║");
             System.out.println("╚══════════════════════════════╝");
             if (chessMatch.getCurrentPlayer() == Color.WHITE) {
                 System.out.println("🏆 Vencedor: ♙ GPT (Brancas)!");
